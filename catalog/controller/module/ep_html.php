@@ -79,11 +79,12 @@ class ControllerModuleEPHtml extends Controller {
 		}*/
 		if($product_id != ''){
 			//Check if its cached
-			$this->data['products'] = $this->cache->get('item-store-related-' . md5($nick));
+			//$this->data['products'] = $this->cache->get('item-store-related-' . md5($product_id));
 			if(!$this->data['products']){
 		    	$data = array(
 						//'cid'        => $filter_category_id, 
 						'product_id' => $product_id,
+						'keyword'    => $nick,
 						'language'   => $_SESSION['language'], 
 						'search_type'  => 'shop'
 					);
@@ -122,7 +123,7 @@ class ControllerModuleEPHtml extends Controller {
 						'href'        => $this->url->link('product/product', $category_path . '&product_id=' . $result['product_id' ] . '&nick=' . $nick)
 					);
 				}
-				$this->cache->set('item-store-related-'.md5($nick), $this->data['products']);
+				//$this->cache->set('item-store-related-'.md5($product_id), $this->data['products']);
 			}
 		}
 

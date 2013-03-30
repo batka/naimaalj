@@ -327,7 +327,7 @@ class CallTaobao2 {
 		//解析Xml数据
 		$result = getXmlData($result);
 
-		print_r($result);die();
+		//print_r($result);die();
 
 		if($result['taobaoke_shops']['taobaoke_shop']['user_id']){
 			return $result['taobaoke_shops']['taobaoke_shop']['user_id'];
