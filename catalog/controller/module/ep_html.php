@@ -28,7 +28,7 @@ class ControllerModuleEPHtml extends Controller {
 
 		$this->data['nick'] = $nick;
 		//if only found $nick
-		if($nick != ''){
+		/*if($nick != ''){
 			//Check if its cached
 			$this->data['products'] = $this->cache->get('nick' . md5($nick));
 			if(!$this->data['products']){
@@ -76,6 +76,54 @@ class ControllerModuleEPHtml extends Controller {
 				$this->cache->set('nick'.md5($nick), $this->data['products']);
 			}
 			
+		}*/
+		if($product_id != ''){
+			//Check if its cached
+			$this->data['products'] = $this->cache->get('item-store-related-' . md5($nick));
+			if(!$this->data['products']){
+		    	$data = array(
+						//'cid'        => $filter_category_id, 
+						'product_id' => $product_id,
+						'language'   => $_SESSION['language'], 
+						'search_type'  => 'shop'
+					);
+				
+				include_once(ROOT_PATH.'taoapi/web_tao/itemsofnick.php');
+				$CallTaobao = new CallTaobao2;
+				list($sub_categories, $items, $product_total) = $CallTaobao->GetStoreItems($data);
+				//print_r($items); die();
+				foreach ($items as $result) {
+					
+					$img_ext = '_60x60.jpg';
+					$image = $result['image'].$img_ext;
+					
+					
+					if (($this->config->get('config_customer_price') && $this->customer->isLogged()) || !$this->config->get('config_customer_price')) {
+						$price = $this->currency->format($this->tax->calculate($result['price'], 0, $this->config->get('config_tax')));
+					} else {
+						$price = false;
+					}
+					
+					$category_path = '';
+					if (isset($this->request->get['path'])) $category_path = 'path=' . $this->request->get['path'];
+					$this->data['products'][] = array(
+						'product_id'  => $result['product_id'],
+						'thumb'       => $image,
+						'name'        => $result['name'],
+						'nick'        => $result['nick'],
+						'score'       => $result['score'],
+						'description' => false,
+						'price'       => $price,
+						'special'     => false,
+						'tax'         => false,
+						'rating'      => 0,
+						'reviews'     => false,
+						'location_city' => $result['location_city'],
+						'href'        => $this->url->link('product/product', $category_path . '&product_id=' . $result['product_id' ] . '&nick=' . $nick)
+					);
+				}
+				$this->cache->set('item-store-related-'.md5($nick), $this->data['products']);
+			}
 		}
 
 		if (file_exists(DIR_TEMPLATE . $this->config->get('config_template') . '/template/module/ep_html.tpl')) {

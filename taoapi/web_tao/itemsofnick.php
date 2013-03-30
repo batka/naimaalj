@@ -19,8 +19,8 @@ class CallTaobao2 {
 		include_once($api_path.'lib/functions.php');
 		include_once($api_path.'lib/page.Class.php');
 		//include_once($api_path.'lib/translator2.php');
-
-		$seller_id = $this->get_user_id($data['keyword']);
+		//print_r($data);die();
+		//$seller_id = $this->get_user_id($data['keyword']);
 		
 		$search_type   = empty($data['search_type'])  ? 'keyword' : $data['search_type'];
 		$cid           = empty($data['cid'])          ? '0' : intval($data['cid']);
@@ -36,7 +36,7 @@ class CallTaobao2 {
 		$page_size     = empty($data['page_size'])    ? '10' : intval($data['page_size']);
 		$nick		   = empty($data['keyword'])     ? '' : $data['keyword'];
 		$keyword       = empty($data['keyword'])     ? '' : $data['keyword'];
-		
+		$product_id    = empty($data['product_id'])  ? '' : $data['product_id'];
 		/*if ($keyword != '' && $data['language'] != '' && $data['language'] != 'cn' && $data['language'] != 'zh-CN' && $this->check_stringType($keyword) != 1)
 		{
 			$Translator = new Translator;
@@ -66,9 +66,9 @@ class CallTaobao2 {
 			/* API应用级输入参数 Start*/
 	
 				'fields' =>  'iid,num_iid,title,nick,pic_url,price,click_url,commission,commission_rate,commission_num,commission_volume,shop_click_url,seller_credit_score,item_location',  //返回字段
-			 	'nick'     => $userNick,
-			 	'relate_type' => 4,
-			 	'seller_id' => $seller_id
+			 	'num_iid'     => $product_id,
+			 	'relate_type' => 3,
+			 	//'seller_id' => $seller_id
 
 					
 			/* API应用级输入参数 End*/
@@ -77,17 +77,17 @@ class CallTaobao2 {
 		/*if ($search_type == 'keyword')  $paramArr['q'] = $keyword; //查询关键字	
 		elseif ($search_type == 'shop') $paramArr['nick'] = $keyword; //查询店铺	*/
 		
-		$paramArr = array_filter($paramArr);
-		$sign = createSign($paramArr, $appSecret);	//生成签名
-		$strParam  = createStrParam($paramArr);	//组织参数		
+		$sign = createSign( $paramArr, $appSecret ); //生成签名
+
+		$strParam  = createStrParam( $paramArr ); //组织参数
 		$strParam .= 'sign=' . $sign . '&app_key=' . $appKey;
-		$urls   = $url.$strParam; //构造Url		
-		$cnt = 0;	//连接超时自动重试
-		
-		while($cnt < 3 && ($result = vita_get_url_content($urls)) === FALSE) $cnt++;
-		
-		//解析Xml数据
-		$result = getXmlData($result);
+		$urls   = $url.$strParam; //构造Url
+
+		//连接超时自动重试
+		$cnt = 0;
+		while ( $cnt < 3 && ( $result = @vita_get_url_content( $urls ) ) === FALSE ) $cnt++;
+
+		$result = getXmlData( $result );//解析Xml数据
 
 		//print_r($result);die();
 
@@ -327,7 +327,13 @@ class CallTaobao2 {
 		//解析Xml数据
 		$result = getXmlData($result);
 
-		return $result['taobaoke_shops']['taobaoke_shop']['user_id'];
+		print_r($result);die();
+
+		if($result['taobaoke_shops']['taobaoke_shop']['user_id']){
+			return $result['taobaoke_shops']['taobaoke_shop']['user_id'];
+		}else{
+			return "";
+		}
 	 }
 }
 ?>
